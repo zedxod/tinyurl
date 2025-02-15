@@ -1,0 +1,45 @@
+import requests
+import json
+import random
+import string
+
+def create_tinyurl(api_key, long_url, domain="tinyurl.com", alias=None, tags=None, description=None):
+    api_url = 'https://api.tinyurl.com/create'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}'
+    }
+    payload = {
+        "url": long_url,
+        "domain": domain,
+        "alias": alias,
+        "tags": tags,
+        "description": description
+    }
+
+    response = requests.post(api_url, headers=headers, data=json.dumps(payload))
+
+    if response.status_code == 200:
+        data = response.json()
+        tiny_url = data['data']['tiny_url']
+        return tiny_url
+    else:
+        print("Failed to create TinyURL.")
+        print(f"Response status code: {response.status_code}")
+        print(f"Response body: {response.text}")
+        return None
+
+if __name__ == "__main__":
+    api_key = 'API-key'
+    long_url = 'https://httpbin.org/ip'  # The destination URL
+
+    # Generate 100 random TinyURLs and append them to the text file
+    with open('generated_tinyurls.txt', 'a') as file:
+        for i in range(100):
+            alias = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))  # Generate a random alias
+            tinyurl = create_tinyurl(api_key, long_url, alias=alias)
+            if tinyurl:
+                file.write(tinyurl + '\n')
+                print(f"Generated TinyURL {i+1}: {tinyurl}")
+
+    print("Generated 100 TinyURLs and appended them to generated_tinyurls.txt")
